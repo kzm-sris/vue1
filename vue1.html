@@ -1,24 +1,39 @@
-<script src="https://unpkg.com/vue@2.5.17"></script>
+<title>ユーザーショッピングアプリ</title>
 <div id="app">
-    <ul>
-      <!-- 各商品の単価と購入個数をリスト表示する -->
-      <li v-for="item in items" v-bind:key="item.name">
-        <input v-model="item.quantity" type="number">
-      {{ item.name }}: {{ item.price }} x {{ item.quantity }} = {{ item.price * item.quantity }}円
-      </li>
-    </ul>
-    <div :style="errorMessageStyle">
+  <router-link to="/shopping">ショッピングページ</router-link>
+  <router-link to="/user">ユーザー</router-link>
+  <router-view></router-view>
+</div>
+
+<script src="https://unpkg.com/vue@2.5.17"></script>
+<script src="https://unpkg.com/vue-router@3.0.1"></script>
+
+<!--ショッピングページのテンプレート-->
+<script type="text/x-template" id="user-shopping">
+  <div>
+  <ul>
+    <!-- 各商品の単価と購入個数をリスト表示する -->
+    <li v-for="item in items" v-bind:key="item.name">
+      <input v-model="item.quantity" type="number">
+    {{ item.name }}: {{ item.price }} x {{ item.quantity }} = {{ item.price * item.quantity }}円
+    </li>
+  </ul>
+  </div>
+  <div :style="errorMessageStyle">
     <p>{{ items[0].name }}: {{ items[0].price }} x {{ items[0].quantity }}</p>
     <p>小計: {{ totalPrice }}</p>
     <p>合計(税込): {{ totalPriceWithTax | numberWithDelimiter }}円</p>
     <p v-show="!canBuy">
       {{ 1000 | numberWithDelimiter }}円以上からご購入いただけます
     </p>
-    </div>
+    <button :disabled = "!canBuy" @click="doBuy">買う</button>
+  </div>
 
-</div>
+</script>
+
 
 <script>
+
 var items = [
   {
     name: '鉛筆',
@@ -36,8 +51,10 @@ var items = [
     quantity: 0
   }
 ]
-var vm = new Vue({
-  el: '#app',
+
+//ショッピングコンポーネント
+var UserShopping = {
+  template:'#user-shopping',
   data: {
     items: items
   },
@@ -47,6 +64,14 @@ var vm = new Vue({
         return '0'
       }
       return value.toString().replace(/(\d)(?=(\d{3})+$)/g, '$1,')
+    }
+  },
+  methods: {
+    doBuy: function(){
+      alert(this.totalPriceWithTax + '円のお買い上げです')
+      this.items.forEach(function(item) {
+        item.quantitiy= 0
+      })
     }
   },
   computed: {
@@ -69,7 +94,31 @@ var vm = new Vue({
       }
     }
   }
+}
+
+
+//ルーターインスタンスの生成
+var router = new VueRouter({
+  routes:[
+    {
+      path:'/shopping',
+      component: UserShopping
+    },
+    {
+      path:'/user',
+      component:{
+        template:'<div>ユーザーが表示される</div>'
+      }
+    }
+  ]
 })
-window.vm = vm
+
+
+
+var app = new Vue({
+  router:router
+}).$mount('#app')
+
+window.app = app
 
 </script>
